@@ -1,0 +1,98 @@
+# -----------------------------
+# .NET / Visual Studio
+# -----------------------------
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# User secrets and local config
+appsettings.Development.json
+appsettings.*.json
+
+# Visual Studio cache/files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains (if anyone uses it)
+.idea/
+
+# User-specific files
+*.rsuser
+*.suo
+*.userprefs
+
+# NuGet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+.nuget/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+
+# Logs
+logs/
+*.log
+
+# -----------------------------
+# Node / Vue 3 (Vite or Vue CLI)
+# -----------------------------
+
+node_modules/
+dist/
+.cache/
+.output/
+.temp/
+
+# Vite specific
+.vite/
+
+# Local env files (never commit these)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# npm/yarn/pnpm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -----------------------------
+# OS / Editor junk
+# -----------------------------
+
+# macOS
+.DS_Store
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Vim
+[._]*.sw[a-p]
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json

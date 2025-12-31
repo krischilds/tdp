@@ -1,0 +1,132 @@
+@Tdp_Api_HostAddress = http://localhost:5201
+
+### AUTH ENDPOINTS
+
+### Register a new user
+POST {{Tdp_Api_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePassword123!",
+  "displayName": "John Doe"
+}
+
+### Login
+POST {{Tdp_Api_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "kris.childs@gmail.com",
+  "password": "babar007",
+  "deviceInfo": "Mozilla/5.0..."
+}
+
+### Define tokens (paste values from login response)
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6ImIxMjdjMmMwMDYzMzQ1ZTZiMGM1MTJmODEwNGVmZWNmIiwidHlwIjoiSldUIn0.eyJzdWIiOiIwZDY3ZWQzYS01OTk3LTRkN2MtOTAyMy04ZDAxNGYwMzBhNzkiLCJlbWFpbCI6ImtyaXMuY2hpbGRzQGdtYWlsLmNvbSIsIm5hbWUiOiJLcmlzIENoaWxkcyIsIm5iZiI6MTc2NzE1MDQ2NiwiZXhwIjoxNzY3MTUxMzY2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUyMDEiLCJhdWQiOiJ0ZHAtYXBpIn0.HI1l9-1SzNPptX37Y5p4ChCa0l7OxSYjukq4h9NVXmyS-BrOBX8OiSFNQ_C4RtAgySTWeIcxzjHvvexTTtzZvjhQJZih7J7ArlOfedz8jyIUF6h1i9deAXFQu2XKi9X7gzc7pgB-bxiXO0PJbwNghatvqECrAjVtkShfnCfhXq3Q33jpmCtaF8SYgj6H-YlzXxP1iySrzThEy4lSlgItoHKLx8I0Q1975MnP6AfxWgDZ41gvxSMN86bRNLquY0FLmih2RX8Py9ynKaVKBNeya6ZIY85gp8c14czbExiu_k_HmgpdMnOy1mIbDRAu32rNKSqDP9FnYyk8i_cQfFIYYA
+@refreshToken = IAVkIIItfWycR5xovaptkEqYdqw60WLC92Uw5TVeXuaju9tbDA3ciyrEe7zv3f1WlJP09u7D3tmZqPYHup/pKQ==
+
+### Refresh access token
+POST {{Tdp_Api_HostAddress}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}",
+  "deviceInfo": "Mozilla/5.0..."
+}
+
+### Logout
+POST {{Tdp_Api_HostAddress}}/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### JWKS ENDPOINT
+
+### Get public key for JWT verification
+GET {{Tdp_Api_HostAddress}}/.well-known/jwks.json
+Accept: application/json
+
+### USERS ENDPOINTS
+
+### Search all users (requires auth)
+GET {{Tdp_Api_HostAddress}}/users
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Search users by query
+GET {{Tdp_Api_HostAddress}}/users?q=john
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### FEATURES ENDPOINTS
+
+### Get all features (requires auth)
+GET {{Tdp_Api_HostAddress}}/features
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Get feature by ID (requires auth)
+
+@featureId = 88789802-bda2-4487-8e32-7beb0294796f
+GET {{Tdp_Api_HostAddress}}/features/{{featureId}}
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Create a new feature (requires auth)
+POST {{Tdp_Api_HostAddress}}/features
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "new_feature_2",
+  "description": "New feature 2 for testing. Please delete me when done."
+}
+
+### Update a feature (requires auth)
+# add feature id from the previous request
+@new_feature1_id = 73aa3c76-b2d6-449d-9a18-4a08bfa220e9
+@new_feature2_id = 8a97c2b8-0160-4bef-9f08-6b33e274b8b8
+
+PUT {{Tdp_Api_HostAddress}}/features/{{new_feature2_id}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "new_feature_2",
+  "description": "Updated description 2. Also, delete me when done testing."
+}
+
+### Delete a feature (requires auth)
+DELETE {{Tdp_Api_HostAddress}}/features/{{new_feature1_id}}
+Authorization: Bearer {{accessToken}}
+
+### USER FEATURES ENDPOINTS
+
+### Get current user's features (requires auth)
+GET {{Tdp_Api_HostAddress}}/users/me/features
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Get features for a specific user (requires auth)
+@current_user_id = 0d67ed3a-5997-4d7c-9023-8d014f030a79
+GET {{Tdp_Api_HostAddress}}/users/{{current_user_id}}/features
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Add feature to current user (requires auth)
+
+POST {{Tdp_Api_HostAddress}}/users/me/features/{{new_feature2_id}}
+Authorization: Bearer {{accessToken}}
+
+### Add feature to another user (requires admin_console feature)
+@other_user_id = 0d67ed3a-5997-4d7c-9023-8d014f030a79
+POST {{Tdp_Api_HostAddress}}/users/{{other_user_id}}/features/{{new_feature2_id}}
+Authorization: Bearer {{accessToken}}
+
+### Remove feature from another user (requires admin_console feature)
+DELETE {{Tdp_Api_HostAddress}}/users/{{other_user_id}}/features/{{new_feature2_id}}
+Authorization: Bearer {{accessToken}}
