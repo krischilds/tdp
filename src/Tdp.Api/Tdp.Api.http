@@ -18,7 +18,7 @@ Content-Type: application/json
 
 {
   "email": "kris.childs@gmail.com",
-  "password": "babar007",
+  "password": "xxxxxxxx",
   "deviceInfo": "Mozilla/5.0..."
 }
 
