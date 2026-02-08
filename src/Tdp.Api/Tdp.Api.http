@@ -130,3 +130,5 @@ Authorization: Bearer {{accessToken}}
 ### Remove feature from another user (requires admin_console feature)
 DELETE {{Tdp_Api_HostAddress}}/users/{{other_user_id}}/features/{{new_feature2_id}}
 Authorization: Bearer {{accessToken}}
+
+return Ok(ResponseDto<object?>.Ok(null, message: "Assigned"));

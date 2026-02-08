@@ -63,6 +63,13 @@ public class FeaturesController : ControllerBase
     [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
+    {
+        using var conn = _db.CreateConnection();
+        var feature = await conn.QuerySingleOrDefaultAsync<Feature>("SELECT * FROM Features WHERE Id=@Id", new { Id = id });
+        if (feature == null) return Problem(title: "Feature not found", statusCode: 404);
+        return Ok(ResponseDto<Feature>.Ok(feature));
+    }
+
     /// <summary>
     /// Request model for creating or updating a feature.
     /// </summary>
@@ -77,14 +84,7 @@ public class FeaturesController : ControllerBase
     /// <returns>The created feature.</returns>
     /// <response code="200">Feature created successfully.</response>
     /// <response code="403">Forbidden - requires admin privileges.</response>
-    /// <response code="409">Feature name already exists.</response>        using var conn = _db.CreateConnection();
-        var feature = await conn.QuerySingleOrDefaultAsync<Feature>("SELECT * FROM Features WHERE Id=@Id", new { Id = id });
-        if (feature == null) return Problem(title: "Feature not found", statusCode: 404);
-        return Ok(ResponseDto<Feature>.Ok(feature));
-    }
-
-    public record UpsertFeatureRequest(string Name, string? Description);
-
+    /// <response code="409">Feature name already exists.</response>
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] UpsertFeatureRequest req)
@@ -98,15 +98,6 @@ public class FeaturesController : ControllerBase
         var id = Guid.NewGuid().ToString();
         var createdAt = DateTime.UtcNow.ToString("O");
         try
-    /// <summary>
-    /// Updates an existing feature. Requires admin_console feature.
-    /// </summary>
-    /// <param name="id">The feature ID to update.</param>
-    /// <param name="req">The feature update request.</param>
-    /// <returns>The updated feature.</returns>
-    /// <response code="200">Feature updated successfully.</response>
-    /// <response code="403">Forbidden - requires admin privileges.</response>
-    /// <response code="404">Feature not found.</response>
         {
             await conn.ExecuteAsync(@"INSERT INTO Features (Id, Name, Description, CreatedAt)
                 VALUES (@Id, @Name, @Description, @CreatedAt);",
@@ -120,6 +111,15 @@ public class FeaturesController : ControllerBase
         return Ok(ResponseDto<Feature>.Created(feature));
     }
 
+    /// <summary>
+    /// Updates an existing feature. Requires admin_console feature.
+    /// </summary>
+    /// <param name="id">The feature ID to update.</param>
+    /// <param name="req">The feature update request.</param>
+    /// <returns>The updated feature.</returns>
+    /// <response code="200">Feature updated successfully.</response>
+    /// <response code="403">Forbidden - requires admin privileges.</response>
+    /// <response code="404">Feature not found.</response>
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, [FromBody] UpsertFeatureRequest req)
@@ -128,15 +128,7 @@ public class FeaturesController : ControllerBase
                      ?? User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId)) return Problem(title: "Unauthorized", statusCode: 401);
         if (!await IsAdminAsync(userId)) return Problem(title: "Forbidden", statusCode: 403);
-/// <summary>
-    /// Deletes a feature. Requires admin_console feature.
-    /// </summary>
-    /// <param name="id">The feature ID to delete.</param>
-    /// <returns>A success response.</returns>
-    /// <response code="200">Feature deleted successfully.</response>
-    /// <response code="403">Forbidden - requires admin privileges.</response>
-    /// <response code="404">Feature not found.</response>
-    
+
         using var conn = _db.CreateConnection();
         var updated = await conn.ExecuteAsync("UPDATE Features SET Name=@Name, Description=@Description WHERE Id=@Id",
             new { Id = id, req.Name, req.Description });
@@ -145,6 +137,14 @@ public class FeaturesController : ControllerBase
         return Ok(ResponseDto<Feature>.Ok(feature));
     }
 
+    /// <summary>
+    /// Deletes a feature. Requires admin_console feature.
+    /// </summary>
+    /// <param name="id">The feature ID to delete.</param>
+    /// <returns>A success response.</returns>
+    /// <response code="200">Feature deleted successfully.</response>
+    /// <response code="403">Forbidden - requires admin privileges.</response>
+    /// <response code="404">Feature not found.</response>
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
@@ -157,6 +157,6 @@ public class FeaturesController : ControllerBase
         using var conn = _db.CreateConnection();
         var deleted = await conn.ExecuteAsync("DELETE FROM Features WHERE Id=@Id", new { Id = id });
         if (deleted == 0) return Problem(title: "Feature not found", statusCode: 404);
-        return Ok(ResponseDto<object>.Ok(null, message: "Deleted"));
+        return Ok(ResponseDto<object>.Ok(null!, message: "Deleted"));
     }
 }

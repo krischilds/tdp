@@ -214,6 +214,6 @@ public class AuthController : ControllerBase
         var hash = AuthService.HashRefreshToken(req.RefreshToken);
         await conn.ExecuteAsync("UPDATE RefreshTokens SET RevokedAt=@RevokedAt WHERE TokenHash=@TokenHash",
             new { RevokedAt = DateTime.UtcNow.ToString("O"), TokenHash = hash });
-        return Ok(ResponseDto<object>.Ok(null, status: 200, message: "Logged out", traceId: HttpContext.TraceIdentifier));
+        return Ok(ResponseDto<object>.Ok(null!, status: 200, message: "Logged out", traceId: HttpContext.TraceIdentifier));
     }
 }

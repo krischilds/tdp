@@ -1,12 +1,42 @@
-using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "TDP API", Version = "v1" });
+    
+    // Add JWT Bearer authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token"
+    });
+    
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // CORS for local dev (Vite default port 5173)
 builder.Services.AddCors(options =>
@@ -19,14 +49,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-// JWT auth setup (RS256-like). The RSA key will be generated at startup and stored in a singleton.
-var rsa = RSA.Create(2048);
-var rsaKey = new RsaSecurityKey(rsa) { KeyId = Guid.NewGuid().ToString("N") };
-builder.Services.AddSingleton<RSA>(rsa);
-builder.Services.AddSingleton(rsaKey);
-
-var issuer = "http://localhost:5201";
-var audience = "tdp-api";
+// JWT auth setup using symmetric key from configuration
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured in appsettings.json");
+var symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+var issuer = builder.Configuration["Jwt:Issuer"] ?? "http://localhost:5201";
+var audience = builder.Configuration["Jwt:Audience"] ?? "tdp-api";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -44,7 +71,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = issuer,
         ValidAudience = audience,
-        IssuerSigningKey = rsaKey
+        IssuerSigningKey = symmetricKey
     };
 });
 

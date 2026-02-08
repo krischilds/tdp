@@ -96,6 +96,15 @@ public class UserFeaturesController : ControllerBase
         if (!await IsAdminAsync(adminId, _db)) return Problem(title: "Forbidden", statusCode: 403);
 
         using var conn = _db.CreateConnection();
+        var countUser = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Users WHERE Id=@Id", new { Id = userId });
+        var countFeature = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Features WHERE Id=@Id", new { Id = featureId });
+        if (countUser == 0 || countFeature == 0) return Problem(title: "Not found", statusCode: 404);
+        await conn.ExecuteAsync(@"INSERT OR IGNORE INTO UserFeatures (UserId, FeatureId, AssignedAt)
+            VALUES (@UserId, @FeatureId, @AssignedAt);",
+            new { UserId = userId, FeatureId = featureId, AssignedAt = DateTime.UtcNow.ToString("O") });
+        return Ok(ResponseDto<object?>.Ok(null, message: "Assigned"));
+    }
+
     /// <summary>
     /// Assigns a feature to the current user.
     /// </summary>
@@ -104,15 +113,6 @@ public class UserFeaturesController : ControllerBase
     /// <response code="200">Feature assigned successfully.</response>
     /// <response code="401">Unauthorized.</response>
     /// <response code="404">Feature not found.</response>
-        var countUser = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Users WHERE Id=@Id", new { Id = userId });
-        var countFeature = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Features WHERE Id=@Id", new { Id = featureId });
-        if (countUser == 0 || countFeature == 0) return Problem(title: "Not found", statusCode: 404);
-        await conn.ExecuteAsync(@"INSERT OR IGNORE INTO UserFeatures (UserId, FeatureId, AssignedAt)
-            VALUES (@UserId, @FeatureId, @AssignedAt);",
-            new { UserId = userId, FeatureId = featureId, AssignedAt = DateTime.UtcNow.ToString("O") });
-        return Ok(ResponseDto<object>.Ok(null, message: "Assigned"));
-    }
-
     [Authorize]
     [HttpPost("me/features/{featureId}")]
     public async Task<IActionResult> AddMyFeature(string featureId)
@@ -121,6 +121,14 @@ public class UserFeaturesController : ControllerBase
                      ?? User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId)) return Problem(title: "Unauthorized", statusCode: 401);
         using var conn = _db.CreateConnection();
+        var countFeature = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Features WHERE Id=@Id", new { Id = featureId });
+        if (countFeature == 0) return Problem(title: "Feature not found", statusCode: 404);
+        await conn.ExecuteAsync(@"INSERT OR IGNORE INTO UserFeatures (UserId, FeatureId, AssignedAt)
+            VALUES (@UserId, @FeatureId, @AssignedAt);",
+            new { UserId = userId, FeatureId = featureId, AssignedAt = DateTime.UtcNow.ToString("O") });
+        return Ok(ResponseDto<object?>.Ok(null, message: "Assigned"));
+    }
+
     /// <summary>
     /// Removes a feature from another user. Requires admin_console feature.
     /// </summary>
@@ -130,14 +138,6 @@ public class UserFeaturesController : ControllerBase
     /// <response code="200">Feature removed successfully.</response>
     /// <response code="403">Forbidden - requires admin privileges.</response>
     /// <response code="404">Relation not found.</response>
-        var countFeature = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Features WHERE Id=@Id", new { Id = featureId });
-        if (countFeature == 0) return Problem(title: "Feature not found", statusCode: 404);
-        await conn.ExecuteAsync(@"INSERT OR IGNORE INTO UserFeatures (UserId, FeatureId, AssignedAt)
-            VALUES (@UserId, @FeatureId, @AssignedAt);",
-            new { UserId = userId, FeatureId = featureId, AssignedAt = DateTime.UtcNow.ToString("O") });
-        return Ok(ResponseDto<object>.Ok(null, message: "Assigned"));
-    }
-
     [Authorize]
     [HttpDelete("{userId}/features/{featureId}")]
     public async Task<IActionResult> RemoveFeature(string userId, string featureId)
@@ -151,7 +151,7 @@ public class UserFeaturesController : ControllerBase
         var deleted = await conn.ExecuteAsync("DELETE FROM UserFeatures WHERE UserId=@UserId AND FeatureId=@FeatureId",
             new { UserId = userId, FeatureId = featureId });
         if (deleted == 0) return Problem(title: "Relation not found", statusCode: 404);
-        return Ok(ResponseDto<object>.Ok(null, message: "Removed"));
+        return Ok(ResponseDto<object?>.Ok(null, message: "Removed"));
     }
 
     [Authorize]
@@ -165,6 +165,6 @@ public class UserFeaturesController : ControllerBase
         var deleted = await conn.ExecuteAsync("DELETE FROM UserFeatures WHERE UserId=@UserId AND FeatureId=@FeatureId",
             new { UserId = userId, FeatureId = featureId });
         if (deleted == 0) return Problem(title: "Relation not found", statusCode: 404);
-        return Ok(ResponseDto<object>.Ok(null, message: "Removed"));
+        return Ok(ResponseDto<object?>.Ok(null, message: "Removed"));
     }
 }
