@@ -1,12 +1,11 @@
 <template>
   <div class="features-view">
     <el-container>
-      <el-header>
-        <h2>My Features</h2>
-        <el-button @click="$router.push('/dashboard')">Back</el-button>
-      </el-header>
       <el-main>
-        <el-button type="primary" @click="loadData" :loading="loading">Refresh</el-button>
+        <div class="page-header">
+          <h2>My Features</h2>
+          <el-button type="primary" @click="loadData" :loading="loading">Refresh</el-button>
+        </div>
         <el-table :data="myFeatures" style="width: 100%; margin-top: 20px;" v-loading="loading">
           <el-table-column prop="name" label="Feature Name" />
           <el-table-column prop="description" label="Description" />
@@ -102,16 +101,18 @@ onMounted(() => {
 
 <style scoped>
 .features-view {
-  height: 100vh;
-}
-.el-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #409eff;
-  color: white;
+  flex: 1;
 }
 .el-main {
   padding: 40px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.page-header h2 {
+  margin: 0;
 }
 </style>

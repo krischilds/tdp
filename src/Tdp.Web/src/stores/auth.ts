@@ -12,7 +12,7 @@ const initUser = () => {
     const parts = token.split('.');
     if (parts.length < 2) return null;
     const payload = JSON.parse(atob(parts[1]!));
-    return { userId: payload.sub, email: payload.email };
+    return { userId: payload.sub, email: payload.email, displayName: payload.name };
   } catch {
     return null;
   }
@@ -21,7 +21,7 @@ const initUser = () => {
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(localStorage.getItem('accessToken'));
   const refreshToken = ref<string | null>(localStorage.getItem('refreshToken'));
-  const user = ref<{ userId: string; email: string } | null>(initUser());
+  const user = ref<{ userId: string; email: string; displayName?: string } | null>(initUser());
 
   const isAuthenticated = () => !!accessToken.value;
 
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
     const parts = data.accessToken.split('.');
     if (parts.length >= 2) {
       const payload = JSON.parse(atob(parts[1]));
-      user.value = { userId: payload.sub, email: payload.email };
+      user.value = { userId: payload.sub, email: payload.email, displayName: payload.name };
     }
   };
 
@@ -106,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
             return false;
           }
         }
-        user.value = { userId: payload.sub, email: payload.email };
+        user.value = { userId: payload.sub, email: payload.email, displayName: payload.name };
         return true;
       } catch {
         logout();

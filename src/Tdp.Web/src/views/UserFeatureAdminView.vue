@@ -1,13 +1,8 @@
 <template>
   <div class="user-feature-admin">
     <el-container>
-      <el-header>
-        <h2>User Feature Admin</h2>
-        <div class="header-actions">
-          <el-button @click="$router.push('/dashboard')">Back</el-button>
-        </div>
-      </el-header>
       <el-main>
+        <h2>User Feature Admin</h2>
         <el-form inline>
           <el-form-item label="Search users">
             <el-input v-model="query" placeholder="Email or name" @input="debouncedSearch" style="width: 320px" />
@@ -154,16 +149,8 @@ doSearch();
 </script>
 
 <style scoped>
-.user-feature-admin { height: 100vh; }
-.el-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #409eff;
-  color: white;
-}
+.user-feature-admin { flex: 1; }
 .el-main { padding: 24px; }
 .card-header { font-weight: 600; }
 .empty { color: #999; padding: 12px; }
-.header-actions { display: flex; gap: 12px; }
 </style>

@@ -1,14 +1,11 @@
 <template>
   <div class="features-admin">
     <el-container>
-      <el-header>
-        <h2>Feature Admin</h2>
-        <div class="header-actions">
-          <el-button @click="$router.push('/dashboard')">Back</el-button>
+      <el-main>
+        <div class="page-header">
+          <h2>Feature Admin</h2>
           <el-button type="primary" @click="openCreate">New Feature</el-button>
         </div>
-      </el-header>
-      <el-main>
         <el-table :data="features" v-loading="loading" style="width: 100%">
           <el-table-column prop="name" label="Name" width="200" />
           <el-table-column prop="description" label="Description" />
@@ -139,20 +136,18 @@ onMounted(() => {
 
 <style scoped>
 .features-admin {
-  height: 100vh;
-}
-.el-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #409eff;
-  color: white;
+  flex: 1;
 }
 .el-main {
   padding: 24px;
 }
-.header-actions {
+.page-header {
   display: flex;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.page-header h2 {
+  margin: 0;
 }
 </style>
